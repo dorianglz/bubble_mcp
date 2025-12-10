@@ -5,8 +5,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install ALL dependencies (including devDependencies for build)
+RUN npm ci
 
 # Copy source code
 COPY . .
@@ -14,8 +14,11 @@ COPY . .
 # Build TypeScript
 RUN npm run build
 
+# Remove devDependencies to reduce image size
+RUN npm prune --production
+
 # Expose API port
 EXPOSE 3000
 
-# Run REST API
-CMD ["npm", "run", "api:build"]
+# Run built API
+CMD ["node", "dist/rest-api/index.js"]
